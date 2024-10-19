@@ -1,6 +1,6 @@
 #ifndef S21_CAT_H
 #define S21_CAT_H
-
+#define _GNU_SOURCE
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 // Structure to store flags
-typedef flags {
+typedef struct {
   int b; // Number non-blank lines
   int e; // Show end-of-line characters as $
   int n; // Number all lines
@@ -16,8 +16,7 @@ typedef flags {
   int T; // Show tabs as ^I
   int t; // Show tabs and non-printable characters
   int v; // Show non-printable characters
-}
-flag;
+} flag;
 
 // Functions for cat implementation
 void init_flags(flag *flag);
