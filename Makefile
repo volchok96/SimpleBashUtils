@@ -1,42 +1,56 @@
-#####################VARIABLES#####################
+##################### VARIABLES #####################
 
 TARGET = s21_cat
 CC = gcc
 FLAGS = -Wall -Werror -Wextra -std=c11
-LFLAGS = -fsanitize=address -g
+LFLAGS = # -fsanitize=address -g
 SRC_DIR = src/cat
 SRC_C = $(wildcard $(SRC_DIR)/*.c)
 SRC_H = $(wildcard $(SRC_DIR)/*.h)
-OBJ = $(patsubst %.c, %.o, $(SRC_C))
+OBJ = $(patsubst $(SRC_DIR)/%.c, $(SRC_DIR)/%.o, $(SRC_C))  # Compile object files in src/cat/
 INC = -I$(SRC_DIR)
+TEST_FILES = $(wildcard $(SRC_DIR)/test*.txt)  # All test files in format test*.txt in src/cat
 
-#####################TARGETS#####################
+##################### TARGETS #####################
 
-all: clean $(TARGET)
+all: clean stylecor $(TARGET)
 
-# Target for creating the binary file
+# Creating the executable file
 $(TARGET): $(OBJ)
-	$(CC) $(LFLAGS) $(FLAGS) $(OBJ) -o $(TARGET)
+	$(CC) $(LFLAGS) $(FLAGS) $(OBJ) -o $(SRC_DIR)/$(TARGET)
 
-# Rule for compiling .o from .c
-%.o: %.c 
+# Rule for compiling .o from .c (object files are stored in src/cat/)
+$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(LFLAGS) $(FLAGS) $(INC) -c $< -o $@
 
-# Style check without changes
+# Checking style without changes
 style:
 	clang-format -n $(SRC_C) $(SRC_H)
 
-# Fixing the style in code
+# Correcting code style
 stylecor:
 	clang-format -i $(SRC_C) $(SRC_H)
 
-.PHONY: clean 
+.PHONY: clean run test cppcheck
 
-# Cleaning up compiled files
+# Cleaning compiled files
 clean:
-	rm -rf $(TARGET) $(OBJ)
+	rm -rf $(SRC_DIR)/$(TARGET) $(SRC_DIR)/*.o
 	rm -rf CPPLINT.cfg
 
 # Static analysis with cppcheck
 cppcheck:
 	cppcheck --enable=all --suppress=missingIncludeSystem $(SRC_C) $(SRC_H)
+
+# Running the compiled executable with arguments
+run: all
+	./$(SRC_DIR)/$(TARGET) $(ARGS)
+
+# Running tests with predefined files from src/cat directory
+test: all
+	@echo "Running tests..."
+	@for file in $(TEST_FILES); do \
+		echo "Testing with $$file..."; \
+		./$(SRC_DIR)/$(TARGET) $$file; \
+	done
+	@echo "All tests completed."
