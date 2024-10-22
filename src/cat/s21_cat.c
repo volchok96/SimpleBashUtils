@@ -98,49 +98,63 @@ void print(int argc, char *argv[], const flag *flag) {
       dprintf(2, "s21_cat: %s: No such file or directory\n", argv[i]);
       continue;
     }
+
+    // Reading the file character by character
     while ((c = fgetc(file)) != EOF) {
+      // Handle -s flag (squeeze blank lines)
       if (flag->s) {
         if (c == '\n') {
           ++empty_lines;
           if (empty_lines > 2)
-            continue;
+            continue; // Skip more than two blank lines
         } else {
-          empty_lines = 0;
+          empty_lines = 0; // Reset for non-blank lines
         }
       }
 
+      // Handle -n flag (number all lines) if -b is not active
       if (flag->n && is_new_line && !flag->b) {
         printf("%6d\t", lines++);
         is_new_line = 0;
       }
 
+      // Handle -b flag (number non-blank lines)
       if (flag->b && is_new_line && c != '\n') {
         printf("%6d\t", lines++);
         is_new_line = 0;
       }
 
+      // Handle -e flag (append $ at the end of each line)
       if (flag->e && c == '\n')
         printf("$");
 
+      // Handle -t flag (replace tabs with ^I)
       if (flag->t && c == '\t') {
         printf("^I");
-        continue;
+        continue; // Move to the next character
       }
 
+      // Handle -v flag (show non-printable characters)
       if (flag->v && c != '\n' && c != '\t') {
         if (c >= 0 && c <= 31) {
-          printf("^%c", c + 64);
-          continue;
+          printf("^");
+          c += 64; // Convert to visible character
+          printf("%c", c);
+          continue; // Skip original character print
         } else if (c == 127) {
           printf("^?");
-          continue;
+          continue; // Skip original character print
         }
       }
 
+      // Reset new line flag
       if (c == '\n')
         is_new_line = 1;
+
+      // Print the character
       printf("%c", c);
     }
-    fclose(file);
+
+    fclose(file); // Close the file after processing
   }
 }
