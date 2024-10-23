@@ -1,4 +1,8 @@
 #include "s21_cat.h"
+#include <getopt.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 int main(int argc, char **argv) {
   static flag flag; // Static structure for storing flags
@@ -53,9 +57,11 @@ void check_flags(int argc, char **argv, flag *flag) {
     switch (res) {
     case 'b':
       flag->b = 1;
+      flag->n = 0; // Disable -n if -b is set
       break;
     case 'n':
-      flag->n = 1;
+      if (!flag->b)
+        flag->n = 1; // Enable -n only if -b is not set
       break;
     case 'E':
       flag->e = 1;
@@ -67,15 +73,15 @@ void check_flags(int argc, char **argv, flag *flag) {
     case 's':
       flag->s = 1;
       break;
-    case 'v':
-      flag->v = 1;
-      break;
     case 't':
       flag->t = 1;
       flag->v = 1;
       break;
     case 'T':
       flag->t = 1;
+      break;
+    case 'v':
+      flag->v = 1;
       break;
     case '?':
       dprintf(2, "%s: illegal option -- %c\n", argv[0], res);
@@ -85,76 +91,75 @@ void check_flags(int argc, char **argv, flag *flag) {
   }
 }
 
-// Function to print file content considering flags
 void print(int argc, char *argv[], const flag *flag) {
   int c = 0;
 
-  for (int i = optind; i < argc; i++) {
-    int empty_lines = 0;
-    int lines = 1;
-    int is_new_line = 1;
+  for (int i = optind; i < argc;
+       i++) { // optind is the index of the next element to be processed in argv
+    int empty_lines;
+    int line_number;
+    int is_new_line;
+    line_number = 1; // Counts the number of lines
+    is_new_line = 1; // Indicates the start of a new line
+    empty_lines = 0; // Tracks empty lines
     FILE *file = fopen(argv[i], "r");
     if (file == NULL) {
       dprintf(2, "s21_cat: %s: No such file or directory\n", argv[i]);
       continue;
     }
-
-    // Reading the file character by character
     while ((c = fgetc(file)) != EOF) {
-      // Handle -s flag (squeeze blank lines)
-      if (flag->s) {
+      // Handles squeezing multiple adjacent blank lines
+      if (flag->s) { // -s option
         if (c == '\n') {
           ++empty_lines;
-          if (empty_lines > 2)
-            continue; // Skip more than two blank lines
+          if (empty_lines > 2) {
+            continue;
+          }
         } else {
-          empty_lines = 0; // Reset for non-blank lines
+          empty_lines = 0;
         }
       }
 
-      // Handle -n flag (number all lines) if -b is not active
-      if (flag->n && is_new_line && !flag->b) {
-        printf("%6d\t", lines++);
+      // Handle -n and -b flags (number all lines or non-blank lines)
+      if (is_new_line) {
+        if (flag->n && !flag->b) {
+          printf("%6d\t", line_number++);
+        } else if (flag->b && c != '\n') {
+          printf("%6d\t", line_number++);
+        }
         is_new_line = 0;
       }
-
-      // Handle -b flag (number non-blank lines)
-      if (flag->b && is_new_line && c != '\n') {
-        printf("%6d\t", lines++);
-        is_new_line = 0;
-      }
-
-      // Handle -e flag (append $ at the end of each line)
-      if (flag->e && c == '\n')
-        printf("$");
 
       // Handle -t flag (replace tabs with ^I)
       if (flag->t && c == '\t') {
         printf("^I");
-        continue; // Move to the next character
+        continue;
       }
 
-      // Handle -v flag (show non-printable characters)
-      if (flag->v && c != '\n' && c != '\t') {
-        if (c >= 0 && c <= 31) {
-          printf("^");
-          c += 64; // Convert to visible character
-          printf("%c", c);
-          continue; // Skip original character print
-        } else if (c == 127) {
+      // Handle -v flag (show non-printable characters, except \n and \t)
+      if (flag->v && (c < 32 || c == 127) && c != '\n' && c != '\t') {
+        if (c == 127) {
           printf("^?");
-          continue; // Skip original character print
+        } else {
+          printf("^%c", c + 64);
         }
+        continue;
       }
 
-      // Reset new line flag
-      if (c == '\n')
-        is_new_line = 1;
+      // Handle -e flag (show $ at the end of each line)
+      if (flag->e && c == '\n') {
+        printf("$");
+      }
 
       // Print the character
       printf("%c", c);
+
+      // Check for new line
+      if (c == '\n') {
+        is_new_line = 1; // Set the flag for a new line
+      }
     }
 
-    fclose(file); // Close the file after processing
+    fclose(file);
   }
 }
