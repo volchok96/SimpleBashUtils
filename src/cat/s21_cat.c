@@ -96,12 +96,9 @@ void print(int argc, char *argv[], const flag *flag) {
 
   for (int i = optind; i < argc;
        i++) { // optind is the index of the next element to be processed in argv
-    int empty_lines;
-    int line_number;
-    int is_new_line;
-    line_number = 1; // Counts the number of lines
-    is_new_line = 1; // Indicates the start of a new line
-    empty_lines = 0; // Tracks empty lines
+    int line_number = 1; // Counts the number of lines
+    int is_new_line = 1; // Indicates the start of a new line
+    int empty_lines = 0; // Tracks empty lines
     FILE *file = fopen(argv[i], "r");
     if (file == NULL) {
       dprintf(2, "s21_cat: %s: No such file or directory\n", argv[i]);
