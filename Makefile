@@ -47,10 +47,5 @@ run: all
 	./$(SRC_DIR)/$(TARGET) $(ARGS)
 
 # Running tests with predefined files from src/cat directory
-test: all
-	@echo "Running tests..."
-	@for file in $(TEST_FILES); do \
-		echo "Testing with $$file..."; \
-		./$(SRC_DIR)/$(TARGET) $$file; \
-	done
-	@echo "All tests completed."
+test: 
+	bash src/cat/test_cat.sh
