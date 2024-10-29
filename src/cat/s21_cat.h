@@ -16,12 +16,12 @@ typedef struct {
   int T; // Show tabs as ^I
   int t; // Show tabs and non-printable characters
   int v; // Show non-printable characters
-} flag;
+} flags_cat;
 
 // Functions for cat implementation
-void init_flags(flag *flag);
-void check_flags(int argc, char **argv, flag *flag);
+void init_flags_cat(flags_cat *flags_cat);
+void check_flags_cat(int argc, char **argv, flags_cat *flags_cat);
 void cat_no_arg();
-void print(int argc, char *argv[], const flag *flag);
+void print(int argc, char *argv[], const flags_cat *flags_cat);
 
 #endif

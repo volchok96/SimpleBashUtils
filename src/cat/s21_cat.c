@@ -5,13 +5,13 @@
 #include <unistd.h>
 
 int main(int argc, char **argv) {
-  static flag flag; // Static structure for storing flags
+  static flags_cat flags_cat; // Static structure for storing flags
   if (argc == 1) {
     cat_no_arg(); // If no arguments, read from stdin
   } else {
-    init_flags(&flag);              // Initialize flags
-    check_flags(argc, argv, &flag); // Check flags
-    print(argc, argv, &flag);       // Print file content considering flags
+    init_flags_cat(&flags_cat);              // Initialize flags
+    check_flags_cat(argc, argv, &flags_cat); // Check flags
+    print(argc, argv, &flags_cat); // Print file content considering flags
   }
   return 0;
 }
@@ -27,15 +27,15 @@ void cat_no_arg() {
   }
 }
 
-// Initializing the flag structure (set all flags to 0)
-void init_flags(flag *flag) {
-  flag->b = 0;
-  flag->e = 0;
-  flag->n = 0;
-  flag->s = 0;
-  flag->T = 0;
-  flag->t = 0;
-  flag->v = 0;
+// Initializing the flags_cat structure (set all flags to 0)
+void init_flags_cat(flags_cat *flags_cat) {
+  flags_cat->b = 0;
+  flags_cat->e = 0;
+  flags_cat->n = 0;
+  flags_cat->s = 0;
+  flags_cat->T = 0;
+  flags_cat->t = 0;
+  flags_cat->v = 0;
 }
 
 // Structure for handling long and short flags
@@ -50,38 +50,38 @@ struct option flags[] = {{"number-nonblank", no_argument, 0, 'b'},
                          {0, 0, 0, 0}};
 
 // Function to handle command line flags using getopt_long()
-void check_flags(int argc, char **argv, flag *flag) {
+void check_flags_cat(int argc, char **argv, flags_cat *flags_cat) {
   int res = 0;
   opterr = 0; // Disable default error messages from getopt
   while ((res = getopt_long(argc, argv, "+beEnstTv", flags, 0)) != -1) {
     switch (res) {
     case 'b':
-      flag->b = 1;
-      flag->n = 0; // Disable -n if -b is set
+      flags_cat->b = 1;
+      flags_cat->n = 0; // Disable -n if -b is set
       break;
     case 'n':
-      if (!flag->b)
-        flag->n = 1; // Enable -n only if -b is not set
+      if (!flags_cat->b)
+        flags_cat->n = 1; // Enable -n only if -b is not set
       break;
     case 'E':
-      flag->e = 1;
+      flags_cat->e = 1;
       break;
     case 'e':
-      flag->e = 1;
-      flag->v = 1;
+      flags_cat->e = 1;
+      flags_cat->v = 1;
       break;
     case 's':
-      flag->s = 1;
+      flags_cat->s = 1;
       break;
     case 't':
-      flag->t = 1;
-      flag->v = 1;
+      flags_cat->t = 1;
+      flags_cat->v = 1;
       break;
     case 'T':
-      flag->t = 1;
+      flags_cat->t = 1;
       break;
     case 'v':
-      flag->v = 1;
+      flags_cat->v = 1;
       break;
     case '?':
       dprintf(2, "%s: illegal option -- %c\n", argv[0], res);
@@ -91,7 +91,7 @@ void check_flags(int argc, char **argv, flag *flag) {
   }
 }
 
-void print(int argc, char *argv[], const flag *flag) {
+void print(int argc, char *argv[], const flags_cat *flags_cat) {
   int c = 0;
 
   for (int i = optind; i < argc;
@@ -106,7 +106,7 @@ void print(int argc, char *argv[], const flag *flag) {
     }
     while ((c = fgetc(file)) != EOF) {
       // Handles squeezing multiple adjacent blank lines
-      if (flag->s) { // -s option
+      if (flags_cat->s) { // -s option
         if (c == '\n') {
           ++empty_lines;
           if (empty_lines > 2) {
@@ -119,22 +119,22 @@ void print(int argc, char *argv[], const flag *flag) {
 
       // Handle -n and -b flags (number all lines or non-blank lines)
       if (is_new_line) {
-        if (flag->n && !flag->b) {
+        if (flags_cat->n && !flags_cat->b) {
           printf("%6d\t", line_number++);
-        } else if (flag->b && c != '\n') {
+        } else if (flags_cat->b && c != '\n') {
           printf("%6d\t", line_number++);
         }
         is_new_line = 0;
       }
 
-      // Handle -t flag (replace tabs with ^I)
-      if (flag->t && c == '\t') {
+      // Handle -t flags_cat (replace tabs with ^I)
+      if (flags_cat->t && c == '\t') {
         printf("^I");
         continue;
       }
 
-      // Handle -v flag (show non-printable characters, except \n and \t)
-      if (flag->v && (c < 32 || c == 127) && c != '\n' && c != '\t') {
+      // Handle -v flags_cat (show non-printable characters, except \n and \t)
+      if (flags_cat->v && (c < 32 || c == 127) && c != '\n' && c != '\t') {
         if (c == 127) {
           printf("^?");
         } else {
@@ -143,8 +143,8 @@ void print(int argc, char *argv[], const flag *flag) {
         continue;
       }
 
-      // Handle -e flag (show $ at the end of each line)
-      if (flag->e && c == '\n') {
+      // Handle -e flags_cat (show $ at the end of each line)
+      if (flags_cat->e && c == '\n') {
         printf("$");
       }
 
@@ -153,7 +153,7 @@ void print(int argc, char *argv[], const flag *flag) {
 
       // Check for new line
       if (c == '\n') {
-        is_new_line = 1; // Set the flag for a new line
+        is_new_line = 1; // Set the flags_cat for a new line
       }
     }
 
