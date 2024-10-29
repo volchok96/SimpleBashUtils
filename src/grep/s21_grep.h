@@ -10,17 +10,17 @@
 #define BUFFSIZE 4096 // size of data block on file systems (4-8 KB)
 
 typedef struct {
-  int e;  // For regex
-  int i;  // Ignores case
-  int v;  // Inverts result of searching
-  int c;  // Number of lines where searching string is found
-  int l;  // Number of files where searching string is found
-  int n;  // Line number in the output of the searched string
-  int h;  // Doesn't show files where searching string is found
-  int s;  // Doesn't show messages about files that weren't found or couldn't be
-          // read
-  int f;  // Gets regular expressions from file (needs arguments)
-  int o;  // Shows only searched string without full line
+  int e; // For regex
+  int i; // Ignores case
+  int v; // Inverts result of searching
+  int c; // Number of lines where searching string is found
+  int l; // Number of files where searching string is found
+  int n; // Line number in the output of the searched string
+  int h; // Doesn't show files where searching string is found
+  int s; // Doesn't show messages about files that weren't found or couldn't be
+         // read
+  int f; // Gets regular expressions from file (needs arguments)
+  int o; // Shows only searched string without full line
 
   long long int string_count;
   int match_lines_count;

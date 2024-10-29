@@ -3,9 +3,9 @@
 int main(int argc, char *argv[]) {
   if (argc == 1) {
     printf(
-    "usage: grep [-eivclnhsof] [--ignore-case] [--invert-match] [--count]\n"
-    "\t[--files-with-matches] [--line-number] [--no-filename]\n"
-    "\t[--s] [--f] [--o] pattern [file ...]\n");
+        "usage: grep [-eivclnhsof] [--ignore-case] [--invert-match] [--count]\n"
+        "\t[--files-with-matches] [--line-number] [--no-filename]\n"
+        "\t[--s] [--f] [--o] pattern [file ...]\n");
     exit(EXIT_FAILURE);
   }
   static flags_grep flags_grep = {0};
@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-struct option flags[] = {{"e", no_argument, 0, 'e'},  // -b
+struct option flags[] = {{"e", no_argument, 0, 'e'}, // -b
                          {"ignore-case", no_argument, 0, 'i'},
                          {"invert-match", no_argument, 0, 'v'},
                          {"count", no_argument, 0, 'c'},
@@ -25,5 +25,3 @@ struct option flags[] = {{"e", no_argument, 0, 'e'},  // -b
                          {"f", no_argument, 0, 'f'},
                          {"o", no_argument, 0, 'o'},
                          {0, 0, 0, 0}};
-
-
