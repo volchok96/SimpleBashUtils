@@ -37,7 +37,8 @@ void check_flags_grep(int argc, char **argv, flags_grep *flag);
 void open_file(int argc, char **argv, flags_grep *flag);
 void flag_grep_e(flags_grep *flag);
 void flag_grep_f(char *argv[], flags_grep *flag);
-void search_and_print(char *argv[], FILE *file, flags_grep *flag, int optindi);
+void search_and_print(char *argv[], FILE *file, flags_grep *flag,
+                      int file_index);
 void is_it_files(int argc, char **argv, flags_grep *flag);
 extern int optind, opterr, optopt;
 
