@@ -1,7 +1,7 @@
 ##################### VARIABLES #####################
 
-TARGET_CAT = s21_cat
-TARGET_GREP = s21_grep
+TARGET_CAT = src/cat/s21_cat
+TARGET_GREP = src/grep/s21_grep
 CC = gcc
 FLAGS = -Wall -Werror -Wextra -std=c11
 LFLAGS = # -fsanitize=address -g
