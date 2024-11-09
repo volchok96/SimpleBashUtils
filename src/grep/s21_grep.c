@@ -1,198 +1,188 @@
 #include "s21_grep.h"
 
 int main(int argc, char *argv[]) {
-  // Check if no arguments are passed and print usage instructions if true
   if (argc == 1) {
     printf(
-        "usage: grep [-eivclnhsof] [--ignore-case] [--invert-match] [--count]\n"
-        "\t[--files-with-matches] [--line-number] [--no-filename]\n"
-        "\t[--s] [--f] [--o] pattern [file ...]\n");
+        "usage: grep [-eivclnhsfo] [file ...] [-e pattern] [-f file]\n");
     exit(EXIT_FAILURE);
   }
-
-  // Initialize flags_grep structure with default values
-  static flags_grep flags_grep = {0};
-  
-  // Parse command-line flags_grep and store results in the flags_grep structure
-  check_flags_grep(argc, argv, &flags_grep);
-  
-  // Process files based on parsed flags_grep
-  open_file(argc, argv, &flags_grep);
+  flags_grep flag = {0};
+  check_flags_grep(argc, argv, &flag);
+  open_file(argc, argv, &flag);
   return 0;
 }
 
-// Define flags_grep with associated keys for parsing options
-struct option long_flags_grep[] = {{"e", no_argument, 0, 'e'},
-                              {"ignore-case", no_argument, 0, 'i'},
-                              {"invert-match", no_argument, 0, 'v'},
-                              {"count", no_argument, 0, 'c'},
-                              {"files-with-matches", no_argument, 0, 'l'},
-                              {"line-number", no_argument, 0, 'n'},
-                              {"no-filename", no_argument, 0, 'h'},
-                              {"s", no_argument, 0, 's'},
-                              {"f", no_argument, 0, 'f'},
-                              {"o", no_argument, 0, 'o'},
-                              {0, 0, 0, 0}};
+struct option long_options[] = {
+    {"e", no_argument, 0, 'e'},
+    {"ignore-case", no_argument, 0, 'i'},
+    {"invert-match", no_argument, 0, 'v'},
+    {"count", no_argument, 0, 'c'},
+    {"files-with-matches", no_argument, 0, 'l'},
+    {"line-number", no_argument, 0, 'n'},
+    {"no-filename", no_argument, 0, 'h'},
+    {"s", no_argument, 0, 's'},
+    {"f", no_argument, 0, 'f'},
+    {"o", no_argument, 0, 'o'},
+    {0, 0, 0, 0}
+};
 
-void check_flags_grep(int argc, char **argv, flags_grep *flags_grep) {
+void check_flags_grep(int argc, char **argv, flags_grep *flag) {
   int res = 0;
-  opterr = 0;  // Disable automatic error messages from getopt_long
-
-  // Read flags_grep using getopt_long until -1 is returned
-  while ((res = getopt_long(argc, argv, "e:ivclnhsf:o", long_flags_grep, 0)) != -1) {
+  opterr = 0;
+  while ((res = getopt_long(argc, argv, "e:ivclnhsf:o", long_options, 0)) != -1) {
     switch (res) {
-    case 'e':
-      flags_grep->e = 1;  // Enable -e flag
-      flag_grep_e(flags_grep);  // Call function to process -e flag
-      break;
-    case 'i':
-      flags_grep->i = 1;  // Enable case-insensitive search
-      break;
-    case 'v':
-      flags_grep->v = 1;  // Enable inverted search
-      break;
-    case 'c':
-      flags_grep->c = 1;  // Enable count of matching lines
-      break;
-    case 'l':
-      flags_grep->l = 1;  // Enable list of files with matches
-      break;
-    case 'n':
-      flags_grep->n = 1;  // Enable line numbering in output
-      break;
-    case 'h':
-      flags_grep->h = 1;  // Enable suppression of filenames in output
-      break;
-    case 's':
-      flags_grep->s = 1;  // Enable silent mode (suppress error messages)
-      break;
-    case 'f':
-      flags_grep->f = 1;  // Enable file-based pattern search
-      flag_grep_f(argv, flags_grep);  // Process file for -f flag
-      break;
-    case 'o':
-      flags_grep->o = 1;  // Enable output of only matching strings
-      break;
-    case '?':
-      // Print error message for invalid option and exit
-      fprintf(stderr, "%s: invalid option -- %s\n", argv[0] + 2, argv[optind - 1]);
-      fprintf(stderr,
-              "usage: %s [-eivclnhsfo] [file ...] [-e pattern] [-f file] \n",
-              argv[0] + 2);
-      exit(EXIT_FAILURE);
+      case 'e':
+        flag->e = 1;
+        flag_grep_e(flag);
+        break;
+      case 'i':
+        flag->i = 1;
+        break;
+      case 'v':
+        flag->v = 1;
+        break;
+      case 'c':
+        flag->c = 1;
+        break;
+      case 'l':
+        flag->l = 1;
+        break;
+      case 'n':
+        flag->n = 1;
+        break;
+      case 'h':
+        flag->h = 1;
+        break;
+      case 's':
+        flag->s = 1;
+        break;
+      case 'f':
+        flag->f = 1;
+        flag_grep_f(argv, flag);
+        break;
+      case 'o':
+        flag->o = 1;
+        break;
+      case '?':
+        dprintf(2, "%s: invalid option -- %s\n", argv[0] + 2,
+                ((argv[optind - 1]) + 1));
+        dprintf(2,
+                "usage: %s [-eivclnhsfo] [file ...] [-e pattern] [-f file] \n",
+                argv[0] + 2);
+        exit(1);
     }
   }
 }
 
-void flag_grep_e(flags_grep *flags_grep) {
-  if (flags_grep->e_count > 1)  // Add "|" if multiple expressions are present
-    strcat(flags_grep->search_express, "|");
-  strcat(flags_grep->search_express, optarg);  // Append the pattern from -e flag
-  flags_grep->e_count++;  // Increment the pattern count
+void flag_grep_e(flags_grep *flag) {
+  if (flag->e_count > 0) strcat(flag->search_express, "|");
+  strcat(flag->search_express, optarg);
+  flag->e_count++;
 }
 
-void flag_grep_f(char *argv[], flags_grep *flags_grep) {
-  FILE *file;
-  file = fopen(optarg, "r");  // Open file from -f flag argument
-  if (file == NULL) {
-    fprintf(stderr, "%s: %s: No such file or directory\n", argv[0] + 2, argv[optind - 1]);
+void flag_grep_f(char *argv[], flags_grep *flag) {
+  FILE *fd = fopen(optarg, "r");
+  if (fd == NULL) {
+    dprintf(2, "%s: %s: No such file or directory\n", argv[0] + 2, argv[optind - 1]);
     exit(EXIT_FAILURE);
   }
 
-  static char buffer[BUFFSIZE] = {0};
-
-  // Read patterns line by line from file and add them to search expression
-  while (fgets(buffer, BUFFSIZE, file) != NULL) {
-    if (buffer[strlen(buffer) - 1] == '\n')  // Remove newline character
-      buffer[strlen(buffer) - 1] = '\0';
-    if (flags_grep->e_count > 0)
-      strcat(flags_grep->search_express, "|");  // Add "|" if multiple patterns
-    strcat(flags_grep->search_express, buffer);  // Add the pattern
-    flags_grep->e_count++;
+  char buffer[BUFFSIZE] = {0};
+  while (fgets(buffer, BUFFSIZE, fd) != NULL) {
+    if (buffer[strlen(buffer) - 1] == '\n') buffer[strlen(buffer) - 1] = 0;
+    if (flag->e_count > 0) strcat(flag->search_express, "|");
+    if (*buffer == '\0') {
+      flag->empty_lines = 1;
+      strcat(flag->search_express, ".");
+    } else {
+      strcat(flag->search_express, buffer);
+    }
+    flag->e_count++;
   }
-  fclose(file);  // Close the file
+  fclose(fd);
 }
 
-int is_flag(char **argv, int i) {
-  if (argv[i] != NULL && argv[i][0] == '-') {  // Check if argument is a flag
-    if (argv[i][strlen(argv[i]) - 1] == 'e' || argv[i][strlen(argv[i]) - 1] == 'f')
-      return 2;  // Return 2 for -e or -f, as they require additional arguments
-    return 1;  // Return 1 for other flags_grep
+int is_it_flag(char **argv, int i) {
+  int is_flag = 0;
+  if (argv[i][0] == '-') {
+    is_flag = 1;
+    if ((argv[i][strlen(argv[i]) - 1] == 'e') || (argv[i][strlen(argv[i]) - 1] == 'f'))
+      is_flag = 2;
   }
-  return 0;  // Return 0 if not a flag
+  return is_flag;
 }
 
-void check_files(int argc, char **argv, flags_grep *flags_grep) {
-  for (int i = 1; i < argc; i++) {
-    int flag_type = is_flag(argv, i);
-    if (flag_type == 0 && flags_grep->e_count == 0) {
-      flags_grep->e_count = argc - i;  // Count files without flags_grep
+void is_it_files(int argc, char **argv, flags_grep *flag) {
+  for (int i = 1, found = 0; i < argc; ++i) {
+    int flag_type = is_it_flag(argv, i);
+    if (flag_type == 0 && found == 0) {
+      if ((argc - i - 1) > 1) flag->file_s++;
       break;
     }
+    found = flag_type;
   }
 }
 
-void open_file(int argc, char **argv, flags_grep *flags_grep) {
-  FILE *file;
-  check_files(argc, argv, flags_grep);  // Check for file arguments
+void open_file(int argc, char **argv, flags_grep *flag) {
+  is_it_files(argc, argv, flag);
 
   for (int i = 1; i < argc; i++) {
-    int flag_type = is_flag(argv, i);
-    if (flag_type == 2) {  // Skip additional argument for -e or -f
+    int flag_type = is_it_flag(argv, i);
+    if (flag_type == 2) { 
       i++;
       continue;
     }
-    if (!(flags_grep->f || flags_grep->e) && flag_type == 0 && flags_grep->e_count == 0) {
-      strcat(flags_grep->search_express, argv[i]);  // Set search expression
-      flags_grep->e_count++;
+    if (!(flag->f || flag->e) && flag_type == 0 && !flag->e_count) {
+      strcat(flag->search_express, argv[i] ? argv[i] : "");
+      flag->e_count++;
       optind++;
       continue;
     }
-    if (flag_type == 0) {  // Process files
-      file = fopen(argv[i], "r");
-      if (file == NULL) {
-        if (!flags_grep->s) {
-          fprintf(stderr, "%s: %s: No such file or directory\n", argv[0] + 2, argv[i]);
+    if (flag_type == 0) {
+      FILE *fd = fopen(argv[i], "r");
+      if (fd == NULL) {
+        if (flag->s != 1) {
+          dprintf(2, "%s: %s: No such file or directory\n", argv[0] + 2, argv[i]);
         }
         continue;
       }
-      search_and_print(argv, file, flags_grep, i);  // Search in file
-      fclose(file);
+      search_and_print(argv, fd, flag, i);
+      fclose(fd);
     }
   }
 }
 
-void search_and_print(char *argv[], FILE *file, flags_grep *flags_grep, int file_index) {
-  regex_t regex;
-  int regflags = REG_EXTENDED;
-  if (flags_grep->i) {
-    regflags |= REG_ICASE;  // Set case-insensitive search if -i flag is set
-  }
+void search_and_print(char *argv[], FILE *fd, flags_grep *flag, int file_index) {
+  regex_t rx;
+  int cflags = REG_EXTENDED | (flag->i ? REG_ICASE : 0);
+  if (regcomp(&rx, flag->search_express, cflags) != 0) exit(EXIT_FAILURE);
 
-  // Compile the regex with search expression and selected flags_grep
-  if (regcomp(&regex, flags_grep->search_express, regflags) != 0) {
-    fprintf(stderr, "Regex compilation error.\n");
-    return;
-  }
+  char str_var[BUFFSIZE] = {0};
+  flag->match_lines_count = flag->match_files_count = flag->string_count = 0;
 
-  char line[BUFFSIZE] = {0};
-  flags_grep->string_count = 0;
-
-  // Read lines one by one from the file
-  while (fgets(line, BUFFSIZE, file)) {
-    flags_grep->string_count++;  // Count lines
-    int match = (regexec(&regex, line, 0, NULL, 0) == 0) != flags_grep->v;
-
-    if (match) {
-      if (flags_grep->n) {
-        printf("%lld:", flags_grep->string_count);  // Print line number if -n flag is set
+  while (fgets(str_var, BUFFSIZE, fd)) {
+    flag->string_count++;
+    char *ptr = str_var;
+    int match = regexec(&rx, ptr, 1, (regmatch_t[1]){0}, 0);
+    if ((match == 0 && flag->v == 0) || (match == REG_NOMATCH && flag->v == 1)) {
+      if (!flag->c && !flag->l) {
+        if (flag->file_s && !flag->h && !(flag->o && flag->empty_lines)) printf("%s:", argv[file_index]);
+        if (flag->n) printf("%lld:", flag->string_count);
+        if (flag->o) {
+          while (!match && ptr[0]) {
+            printf("%.*s\n", (int)(str_var + match - ptr), ptr);
+            ptr += match;
+            match = regexec(&rx, ptr, 1, (regmatch_t[1]){0}, REG_NOTBOL);
+          }
+        }
+        if (!flag->o || (flag->v && flag->o == 1)) printf("%s", str_var);
+      } else {
+        flag->match_lines_count++;
       }
-      if (!flags_grep->h && argv[file_index] != NULL) {
-        printf("%s:", argv[file_index]);  // Print filename if -h flag is not set
-      }
-      printf("%s", line);  // Print matched line
     }
   }
+  if (flag->c) printf("%d\n", flag->match_lines_count);
+  if (flag->l && flag->match_files_count && !flag->v && !flag->h) printf("%s\n", argv[file_index]);
 
-  regfree(&regex);  // Free regex resources
+  regfree(&rx);
 }
