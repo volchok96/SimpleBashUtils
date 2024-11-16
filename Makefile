@@ -19,39 +19,39 @@ INC_GREP = -I$(SRC_DIR_GREP)
 
 ##################### TARGETS #####################
 
-# Основные цели
-all: $(TARGET_CAT) $(TARGET_GREP)
+# Main targets
+all: s21_cat s21_grep
 
-cat: clean stylecor $(TARGET_CAT)
-grep: clean stylecor $(TARGET_GREP)
+s21_cat: clean stylecor $(TARGET_CAT)
+s21_grep: clean stylecor $(TARGET_GREP)
 
-# Создание исполняемого файла для cat
+# Create executable file for cat
 $(TARGET_CAT): $(OBJ_CAT)
 	$(CC) $(LFLAGS) $(FLAGS) $(OBJ_CAT) -o $(TARGET_CAT)
 
-# Создание исполняемого файла для grep
+# Create executable file for grep
 $(TARGET_GREP): $(OBJ_GREP)
 	$(CC) $(LFLAGS) $(FLAGS) $(OBJ_GREP) -o $(TARGET_GREP)
 
-# Правило для компиляции .o из .c в src/cat/
+# Rule for compiling .o from .c in src/cat/
 $(SRC_DIR_CAT)/%.o: $(SRC_DIR_CAT)/%.c
 	$(CC) $(LFLAGS) $(FLAGS) $(INC_CAT) -c $< -o $@
 
-# Правило для компиляции .o из .c в src/grep/
+# Rule for compiling .o from .c in src/grep/
 $(SRC_DIR_GREP)/%.o: $(SRC_DIR_GREP)/%.c
 	$(CC) $(LFLAGS) $(FLAGS) $(INC_GREP) -c $< -o $@
 
 ##################### STYLE AND CLEANUP #####################
 
-# Проверка стиля без исправлений
+# Check code style without fixing
 style:
 	clang-format -n $(SRC_C_CAT) $(SRC_H_CAT) $(SRC_C_GREP) $(SRC_H_GREP)
 
-# Исправление стиля кода
+# Fix code style
 stylecor:
 	clang-format -i $(SRC_C_CAT) $(SRC_H_CAT) $(SRC_C_GREP) $(SRC_H_GREP)
 
-# Очистка собранных файлов
+# Clean up built files
 clean:
 	rm -rf $(TARGET_CAT) $(TARGET_GREP) $(OBJ_CAT) $(OBJ_GREP)
 	rm -rf CPPLINT.cfg
@@ -60,22 +60,22 @@ clean:
 
 .PHONY: clean run_cat run_grep test_cat test_grep cppcheck
 
-# Статический анализ с помощью cppcheck
+# Static analysis using cppcheck
 cppcheck:
 	cppcheck --enable=all --suppress=missingIncludeSystem $(SRC_C_CAT) $(SRC_H_CAT) $(SRC_C_GREP) $(SRC_H_GREP)
 
-# Запуск собранного cat с аргументами
+# Run compiled cat with arguments
 run_cat: $(TARGET_CAT)
 	./$(TARGET_CAT) $(ARGS)
 
-# Запуск собранного grep с аргументами
+# Run compiled grep with arguments
 run_grep: $(TARGET_GREP)
 	./$(TARGET_GREP) $(ARGS)
 
-# Тесты для cat
+# Tests for cat
 test_cat: $(TARGET_CAT)
 	bash $(SRC_DIR_CAT)/test_cat.sh
 
-# Тесты для grep
+# Tests for grep
 test_grep: $(TARGET_GREP)
 	bash $(SRC_DIR_GREP)/test_grep.sh

@@ -10,10 +10,8 @@ FILENAME4="src/grep/texts/4.txt"
 FILENAME5="src/grep/texts/5.txt"
 LOG_DIR="testtxt"
 
-# Make sure the directory for results exists
 mkdir -p $LOG_DIR
 
-# Patterns for testing
 SHABLO=""
 SHABLON="123"
 SHABLON2="abc"
@@ -21,7 +19,6 @@ SHABLON3="[Xx]"
 SHABLON4="[A-Z]"
 SHABLON5="^[A-Z]"
 
-# Main testing loop
 for var in -v -c -l -n -i -h -s -o
 do
     TEST1="$var $SHABLO \"$FILENAME1\" \"$FILENAME2\" \"$FILENAME3\" \"$FILENAME4\" \"$FILENAME5\""
@@ -40,7 +37,6 @@ do
     rm "$LOG_DIR/s21_grep$var.txt" "$LOG_DIR/grep$var.txt"
 done
 
-# Check for multiple options in one test
 for var in -v -c -l -n -i -h -s -o
 do
     for var2 in -v -c -l -n -i -h -s -o
@@ -65,7 +61,6 @@ do
     done
 done
 
-# Testing with patterns
 for SHABLON_VAR in "$SHABLON" "$SHABLON2" "$SHABLON3" "$SHABLON4" "$SHABLON5"
 do
     for var in -v -c -l -n -i -h -s -o
@@ -87,6 +82,5 @@ do
     done
 done
 
-# Final results
 echo "SUCCESS: $COUNTER_SUCCESS"
 echo "FAIL: $COUNTER_FAIL"

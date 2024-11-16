@@ -6,13 +6,11 @@ DIFF_RES=""
 TEST_FILES="src/cat/test1.txt src/cat/test2.txt"
 echo "" > log.txt
 
-# Проверка на существование файлов
 if [ ! -f src/cat/test1.txt ] || [ ! -f src/cat/test2.txt ]; then
     echo "Один или оба тестовых файла отсутствуют!" | tee -a log.txt
     exit 1
 fi
 
-# Функция для выполнения тестов
 run_test() {
     local flags="$1"
     echo "Testing with flags: $flags" | tee -a log.txt
@@ -35,15 +33,14 @@ run_test() {
             echo "$flags for $file" >> log.txt
             (( COUNTER_FAIL++ ))
         fi
+        rm -f cat.txt s21_cat.txt
     done
 }
 
-# Тестирование с одним флагом
 for var in -v -b -e -n -s -t; do
     run_test "$var"
 done
 
-# Тестирование с двумя флагами
 for var in -b -e -n -s -t -v; do
     for var2 in -b -e -n -s -t -v; do
         if [ "$var" != "$var2" ]; then
@@ -52,7 +49,6 @@ for var in -b -e -n -s -t -v; do
     done
 done
 
-# Тестирование с тремя флагами
 for var in -b -e -n -s -t -v; do
     for var2 in -b -e -n -s -t -v; do
         for var3 in -b -e -n -s -t -v; do
