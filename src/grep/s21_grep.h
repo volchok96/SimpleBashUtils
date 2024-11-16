@@ -17,7 +17,8 @@ typedef struct {
   int l; // Number of files in which the search string is found
   int n; // Line number in the output of the search string
   int h; // Does not display files where the search string was found
-  int s; // Does not display messages about files that were not found or cannot be read
+  int s; // Does not display messages about files that were not found or cannot
+         // be read
   int f; // Gets regular expressions from a file (arguments are needed)
   int o; // Displays only the matched string without the whole line
 
@@ -33,12 +34,13 @@ typedef struct {
 
 // void init_options(flags_grep * flag);
 void check_flags_grep(int argc, char **argv, flags_grep *flag);
-void open_file(int argc, char **argv, flags_grep *flag);
+void open_file(int argc, const char *argv[], flags_grep *flag);
+int is_it_flag(const char *argv[], int i);
 void flag_grep_e(flags_grep *flag);
-void flag_grep_f(char *argv[], flags_grep *flag); // changed const char *argv[] to char *argv[]
-void search_and_print(char *argv[], FILE *file, flags_grep *flag, // changed char *argv[] to const char *argv[]
+void flag_grep_f(char *argv[], flags_grep *flag);
+void search_and_print(const char *argv[], FILE *fd, flags_grep *flag,
                       int file_index);
-void is_it_files(int argc, char **argv, flags_grep *flag);
+void is_it_files(int argc, const char *argv[], flags_grep *flag);
 extern int optind, opterr, optopt;
 
 #endif
